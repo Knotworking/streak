@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:streak/data/DatabaseHelper.dart';
+import 'package:streak/models/Habit.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DatabaseHelper();
   runApp(MyApp());
 }
 
@@ -46,9 +50,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  DatabaseHelper dbHelper = DatabaseHelper();
   int _counter = 0;
 
-  void _incrementCounter() {
+  void _incrementCounter() async {
+    Habit newHabit = Habit(id: -1, name: "violin", streak: 0, lastRecordedDate: DateTime.now());
+    dbHelper.saveHabit(newHabit);
+    print(await dbHelper.getHabits());
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
