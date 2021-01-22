@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:streak/data/DatabaseHelper.dart';
+import 'package:streak/models/Habit.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DatabaseHelper();
   runApp(MyApp());
 }
 
@@ -46,17 +50,56 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  DatabaseHelper dbHelper = DatabaseHelper();
 
-  void _incrementCounter() {
+  void addHabit() async {
+    Habit newHabit = Habit(
+        id: -1, name: "violin", streak: 0, lastRecordedDate: DateTime.now());
+    dbHelper.saveHabit(newHabit);
+    print(await dbHelper.getHabits());
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
       // so that the display can reflect the updated values. If we changed
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
-      _counter++;
+
+      //TODO read: what normally goes in setState()
     });
+  }
+
+  void clearDb() async {
+    int deleted = await dbHelper.deleteAllHabits();
+    SnackBar snackBar =
+        SnackBar(content: Text('Deleted ' + deleted.toString() + ' habits'));
+    scaffoldKey.currentState.showSnackBar(snackBar);
+    setState(() {});
+  }
+
+  Widget listWidget() {
+    return FutureBuilder<List>(
+      future: dbHelper.getHabits(),
+      initialData: [],
+      builder: (context, snapshot) {
+        return snapshot.hasData
+            ? ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (_, int position) {
+                  final item = snapshot.data[position];
+                  //get your item data here ...
+                  return Card(
+                    child: ListTile(
+                      title: Text(item.toString()),
+                    ),
+                  );
+                },
+              )
+            : Center(
+                child: CircularProgressIndicator(),
+              );
+      },
+    );
   }
 
   @override
@@ -68,43 +111,19 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.delete), tooltip: 'Clear DB', onPressed: clearDb)
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
+      body: listWidget(),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: addHabit,
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
