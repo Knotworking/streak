@@ -49,16 +49,16 @@ class DatabaseHelper {
     // Convert the List<Map<String, dynamic> into a List<Habit>.
     return List.generate(maps.length, (i) {
       return Habit(
-        id: maps[i]['id'],
-        name: maps[i]['name'],
-        streak: maps[i]['streak'],
-        lastRecordedDate: DateTime.fromMillisecondsSinceEpoch(maps[i]['lastRecordedDate'])
-      );
+          id: maps[i]['id'],
+          name: maps[i]['name'],
+          streak: maps[i]['streak'],
+          lastRecordedDate:
+              DateTime.fromMillisecondsSinceEpoch(maps[i]['lastRecordedDate']));
     });
   }
 
   // Inserts a habit into the database
-  void saveHabit(Habit habit)  async{
+  void saveHabit(Habit habit) async {
     // Get a reference to the database.
     final Database db = await database;
 
@@ -71,5 +71,11 @@ class DatabaseHelper {
       habit.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  // delete all habits from the database
+  Future<int> deleteAllHabits() async {
+    final Database db = await database;
+    return db.delete(habitsTable);
   }
 }
