@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Streaks',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'My Streaks'),
     );
   }
 }
@@ -53,9 +53,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   DatabaseHelper dbHelper = DatabaseHelper();
 
-  void addHabit() async {
-    Habit newHabit = Habit(
-        id: -1, name: "violin", streak: 0, lastRecordedDate: DateTime.now());
+  void addHabit(String name) async {
+    Habit newHabit =
+        Habit(id: -1, name: name, streak: 0, lastRecordedDate: DateTime.now());
     dbHelper.saveHabit(newHabit);
     print(await dbHelper.getHabits());
     setState(() {
@@ -102,6 +102,25 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget newHabitDialog() {
+    TextEditingController _controller = TextEditingController();
+
+    return AlertDialog(
+      title: Text("New Habit"),
+      content: TextFormField(
+        controller: _controller,
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("OK"),
+          onPressed: () {
+            Navigator.pop(context, _controller.text);
+          },
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -123,8 +142,16 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: listWidget(),
       floatingActionButton: FloatingActionButton(
-        onPressed: addHabit,
-        tooltip: 'Increment',
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return newHabitDialog();
+              }).then((value) {
+            addHabit(value);
+          });
+        },
+        tooltip: 'Add Habit',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
