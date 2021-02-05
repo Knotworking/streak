@@ -1,8 +1,8 @@
 class Habit {
   final int id;
-  final String name;
-  final int streak;
-  final DateTime lastRecordedDate;
+  String name;
+  int streak;
+  DateTime lastRecordedDate;
 
   Habit({this.id, this.name, this.streak, this.lastRecordedDate});
 

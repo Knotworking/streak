@@ -69,6 +69,13 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  void incrementHabit(Habit habit) async {
+    dbHelper.modifyHabitCount(habit, 1);
+    setState(() {
+      // do something?
+    });
+  }
+
   void clearDb() async {
     int deleted = await dbHelper.deleteAllHabits();
     SnackBar snackBar =
@@ -86,13 +93,23 @@ class _MyHomePageState extends State<MyHomePage> {
             ? ListView.builder(
                 itemCount: snapshot.data.length,
                 itemBuilder: (_, int position) {
-                  final item = snapshot.data[position];
+                  final habit = snapshot.data[position] as Habit;
                   //get your item data here ...
                   return Card(
-                    child: ListTile(
-                      title: Text(item.toString()),
-                    ),
-                  );
+                      child: Row(
+                    children: [
+                      Expanded(
+                        child: ListTile(
+                          title: Text(habit.toString()),
+                        ),
+                      ),
+                      IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () {
+                            incrementHabit(habit);
+                          })
+                    ],
+                  ));
                 },
               )
             : Center(

@@ -57,6 +57,25 @@ class DatabaseHelper {
     });
   }
 
+  //TODO find better way to read just one entry
+  Future<Habit> getHabit(int id) async {
+    final Database db = await database;
+
+    final List<Map<String, dynamic>> map =
+        await db.query(habitsTable, where: "id = ?", whereArgs: [id], limit: 1);
+
+    if (map.isNotEmpty) {
+      return Habit(
+          id: map[0]['id'],
+          name: map[0]['name'],
+          streak: map[0]['streak'],
+          lastRecordedDate:
+              DateTime.fromMillisecondsSinceEpoch(map[0]['lastRecordedDate']));
+    } else {
+      return null;
+    }
+  }
+
   // Inserts a habit into the database
   void saveHabit(Habit habit) async {
     // Get a reference to the database.
@@ -71,6 +90,20 @@ class DatabaseHelper {
       habit.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  // change a habit's count by an integer value
+  void modifyHabitCount(Habit habit, int modifier) async {
+    final Database db = await database;
+
+    // Editing the passed in habit causes UI jumps
+    Habit existingHabit = await getHabit(habit.id);
+    existingHabit.streak += modifier;
+    existingHabit.lastRecordedDate = DateTime.now();
+
+    // can return the number of rows updated
+    db.update(habitsTable, existingHabit.toMap(),
+        where: "id = ?", whereArgs: [habit.id]);
   }
 
   // delete all habits from the database
