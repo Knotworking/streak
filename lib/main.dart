@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streak/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
 
@@ -74,6 +75,11 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       // do something?
     });
+    _showOverlay(context);
+  }
+
+  void _showOverlay(BuildContext context) {
+    Navigator.of(context).push(StreakOverlay());
   }
 
   void clearDb() async {
