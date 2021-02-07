@@ -7,19 +7,28 @@ final habitsTable = "habits";
 
 class DatabaseHelper {
   // Singleton
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
-  Future<Database> database;
+  static DatabaseHelper _instance;
+  static Database _database;
+
+  DatabaseHelper._createInstance(); // Named constructor to create instance of DatabaseHelper
 
   factory DatabaseHelper() {
+    if (_instance == null) {
+      _instance = DatabaseHelper._createInstance(); // This is executed only once, singleton object
+    }
     return _instance;
   }
 
-  DatabaseHelper._internal() {
-    initDatabase();
+  Future<Database> get database async {
+
+    if (_database == null) {
+      _database = await initDatabase();
+    }
+    return _database;
   }
 
-  initDatabase() async {
-    database = openDatabase(
+  Future<Database> initDatabase() async {
+    var database = await openDatabase(
       join(await getDatabasesPath(), 'habits.db'),
       // When the database is first created, create a table to store data.
       onCreate: (db, version) {
@@ -36,6 +45,7 @@ class DatabaseHelper {
       // path to perform database upgrades and downgrades.
       version: 1,
     );
+    return database;
   }
 
   // List all habits from the habits table
@@ -43,7 +53,8 @@ class DatabaseHelper {
     // Get a reference to the database.
     final Database db = await database;
 
-    // Query the table for all The Dogs.
+    print("db exists:" + (db != null).toString());
+    // Query the table for all habits.
     final List<Map<String, dynamic>> maps = await db.query(habitsTable);
 
     // Convert the List<Map<String, dynamic> into a List<Habit>.

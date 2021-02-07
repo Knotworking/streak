@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streak/StreakOverlay.dart';
+import 'package:streak/ui/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
 
@@ -51,14 +51,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  DatabaseHelper dbHelper = DatabaseHelper();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  DatabaseHelper _dbHelper = DatabaseHelper();
 
   void addHabit(String name) async {
     Habit newHabit =
         Habit(id: -1, name: name, streak: 0, lastRecordedDate: DateTime.now());
-    dbHelper.saveHabit(newHabit);
-    print(await dbHelper.getHabits());
+    _dbHelper.saveHabit(newHabit);
+    print(await _dbHelper.getHabits());
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -71,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void incrementHabit(Habit habit) async {
-    dbHelper.modifyHabitCount(habit, 1);
+    _dbHelper.modifyHabitCount(habit, 1);
     setState(() {
       // do something?
     });
@@ -83,16 +83,16 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void clearDb() async {
-    int deleted = await dbHelper.deleteAllHabits();
+    int deleted = await _dbHelper.deleteAllHabits();
     SnackBar snackBar =
         SnackBar(content: Text('Deleted ' + deleted.toString() + ' habits'));
-    scaffoldKey.currentState.showSnackBar(snackBar);
+    _scaffoldKey.currentState.showSnackBar(snackBar);
     setState(() {});
   }
 
   Widget listWidget() {
     return FutureBuilder<List>(
-      future: dbHelper.getHabits(),
+      future: _dbHelper.getHabits(),
       initialData: [],
       builder: (context, snapshot) {
         return snapshot.hasData
@@ -153,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      key: scaffoldKey,
+      key: _scaffoldKey,
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
