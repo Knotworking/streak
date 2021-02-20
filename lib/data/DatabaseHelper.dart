@@ -53,7 +53,6 @@ class DatabaseHelper {
     // Get a reference to the database.
     final Database db = await database;
 
-    print("db exists:" + (db != null).toString());
     // Query the table for all habits.
     final List<Map<String, dynamic>> maps = await db.query(habitsTable);
 

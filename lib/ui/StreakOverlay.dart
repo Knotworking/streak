@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streak/ui/animations/AnimateStreakItem.dart';
 import 'package:streak/ui/animations/ShowUp.dart';
 
 class StreakOverlay extends ModalRoute<void> {
@@ -43,21 +44,41 @@ class StreakOverlay extends ModalRoute<void> {
         children: <Widget>[
           Expanded(
               child: Center(
-            child: ShowUp(
-              child: Text(
-                'You did it!',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.0,
-                    fontWeight: FontWeight.bold),
+                  child: Stack(
+            children: [
+              //Alignment widget?
+              AnimateStreakText(
+                child: "other text",
+                // child: Text(
+                //   'You did it!',
+                //   style: TextStyle(
+                //       color: Colors.white,
+                //       fontSize: 30.0,
+                //       fontWeight: FontWeight.bold),
+                // ),
+                delay: 1000,
               ),
-              delay: 1000,
+              AnimateStreakText(
+                child: "well done",
+                // child: Text(
+                //   'Well Done!',
+                //   style: TextStyle(
+                //       color: Colors.white,
+                //       fontSize: 30.0,
+                //       fontWeight: FontWeight.bold),
+                // ),
+                delay: 2000,
+              ),
+            ],
+          ))),
+          ShowUp(
+            child: OutlineButton(
+              onPressed: () => Navigator.pop(context),
+              textColor: Colors.white,
+              borderSide: BorderSide(color: Colors.white),
+              child: Text('I know. I\'m great.'),
             ),
-          )),
-          OutlineButton(
-            onPressed: () => Navigator.pop(context),
-            textColor: Colors.white,
-            child: Text('I know. I\'m great.'),
+            delay: 1500,
           )
         ],
       ),
@@ -68,16 +89,9 @@ class StreakOverlay extends ModalRoute<void> {
   Widget buildTransitions(BuildContext context, Animation<double> animation,
       Animation<double> secondaryAnimation, Widget child) {
     // You can add your own animations for the overlay content
-    print("animation: " + animation.toString());
-    print("secondaryAnimation: " + secondaryAnimation.toString());
-    print("child: " + child.toString());
     return FadeTransition(
       opacity: animation,
       child: child,
-      // child: ScaleTransition(
-      //   scale: animation,
-      //   child: child,
-      // ),
     );
   }
 }
