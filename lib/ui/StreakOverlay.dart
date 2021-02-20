@@ -44,39 +44,35 @@ class StreakOverlay extends ModalRoute<void> {
         children: <Widget>[
           Expanded(
               child: Center(
-                  child: Stack(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
             children: [
               //Alignment widget?
-              AnimateStreakText(
-                child: "other text",
-                // child: Text(
-                //   'You did it!',
-                //   style: TextStyle(
-                //       color: Colors.white,
-                //       fontSize: 30.0,
-                //       fontWeight: FontWeight.bold),
-                // ),
-                delay: 1000,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: AnimateStreakText(
+                  child: "other text",
+                  delay: 500,
+                ),
               ),
-              AnimateStreakText(
-                child: "well done",
-                // child: Text(
-                //   'Well Done!',
-                //   style: TextStyle(
-                //       color: Colors.white,
-                //       fontSize: 30.0,
-                //       fontWeight: FontWeight.bold),
-                // ),
-                delay: 2000,
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: AnimateStreakText(
+                  child: "well done",
+                  delay: 1000,
+                ),
               ),
             ],
           ))),
           ShowUp(
-            child: OutlineButton(
-              onPressed: () => Navigator.pop(context),
-              textColor: Colors.white,
-              borderSide: BorderSide(color: Colors.white),
-              child: Text('I know. I\'m great.'),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: OutlineButton(
+                onPressed: () => Navigator.pop(context),
+                textColor: Colors.white,
+                borderSide: BorderSide(color: Colors.white),
+                child: Text('I know. I\'m great.'),
+              ),
             ),
             delay: 1500,
           )

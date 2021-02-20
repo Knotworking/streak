@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 
 class AnimateStreakText extends StatefulWidget {
@@ -16,40 +15,19 @@ class _AnimateStreakTextState extends State<AnimateStreakText>
     with TickerProviderStateMixin {
   AnimationController _movementAnimController;
   Animation<Offset> _animOffset;
-  Animation<TextStyle> _animText;
-  AnimationController _opacityAnimController;
 
   @override
   void initState() {
     super.initState();
 
     _movementAnimController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 2000));
+        vsync: this, duration: Duration(milliseconds: 700));
     final curve = CurvedAnimation(
         curve: Curves.decelerate, parent: _movementAnimController);
 
-    _opacityAnimController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 5000));
-    final opacityCurve = CurvedAnimation(
-        curve: Curves.easeInOut, parent: _opacityAnimController);
-
-    var random = new Random();
-    var endY = random.nextDouble() * -5;
-
     _animOffset =
-        Tween<Offset>(begin: new Offset(0, 5), end: new Offset(0, endY))
+        Tween<Offset>(begin: new Offset(0, -0.5), end: Offset.zero)
             .animate(curve);
-
-    _animText = TextStyleTween(
-            begin: TextStyle(
-                fontSize: 10, color: Colors.white, fontWeight: FontWeight.bold),
-            end: TextStyle(
-                fontSize: 50, color: Colors.white, fontWeight: FontWeight.bold))
-        .animate(curve);
-
-    _animText.addListener(() {
-      setState(() {});
-    });
 
     if (widget.delay == null) {
       _movementAnimController.forward();
@@ -71,7 +49,13 @@ class _AnimateStreakTextState extends State<AnimateStreakText>
     return FadeTransition(
       child: SlideTransition(
           position: _animOffset,
-          child: Text(widget.child, style: _animText.value)),
+          child: Text(
+            widget.child,
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 30.0,
+                fontWeight: FontWeight.bold),
+          )),
       opacity: _movementAnimController,
     );
   }
