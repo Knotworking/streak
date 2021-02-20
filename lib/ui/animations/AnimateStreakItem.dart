@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class AnimateStreakText extends StatefulWidget {
-  final String child;
+  final Text child;
   final int delay;
 
   AnimateStreakText({@required this.child, this.delay});
@@ -49,13 +49,7 @@ class _AnimateStreakTextState extends State<AnimateStreakText>
     return FadeTransition(
       child: SlideTransition(
           position: _animOffset,
-          child: Text(
-            widget.child,
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 30.0,
-                fontWeight: FontWeight.bold),
-          )),
+          child: widget.child),
       opacity: _movementAnimController,
     );
   }

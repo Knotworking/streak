@@ -45,20 +45,34 @@ class StreakOverlay extends ModalRoute<void> {
           Expanded(
               child: Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              //Alignment widget?
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: AnimateStreakText(
-                  child: "other text",
-                  delay: 500,
+              Transform.translate(
+                offset: new Offset(-30.0, 0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: AnimateStreakText(
+                    child: Text(
+                      "\"Keep going!\"",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 30.0,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    delay: 500,
+                  ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+              Transform.translate(
+                offset: new Offset(70.0, 0),
                 child: AnimateStreakText(
-                  child: "well done",
+                  child: Text(
+                    "- The Dalai Lama",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.bold),
+                  ),
                   delay: 1000,
                 ),
               ),
