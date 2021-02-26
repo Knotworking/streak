@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:streak/ui/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
@@ -53,10 +54,17 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DatabaseHelper _dbHelper = DatabaseHelper();
+  final backgroundColor = Color.fromRGBO(245, 245, 245, 1);
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+    return diff == 0 && now.day == date.day;
+  }
 
   void addHabit(String name) async {
-    Habit newHabit =
-        Habit(id: -1, name: name, streak: 0, lastRecordedDate: DateTime.now());
+    Habit newHabit = Habit(
+        id: -1, name: name, streak: 0, lastRecordedDate: DateTime.utc(1970));
     _dbHelper.saveHabit(newHabit);
     print(await _dbHelper.getHabits());
     setState(() {
@@ -76,6 +84,13 @@ class _MyHomePageState extends State<MyHomePage> {
       // do something?
     });
     _showOverlay(context);
+  }
+
+  void updateHabit(Habit habit) async {
+    _dbHelper.updateHabit(habit);
+    setState(() {
+      // do something?
+    });
   }
 
   void _showOverlay(BuildContext context) {
@@ -101,21 +116,67 @@ class _MyHomePageState extends State<MyHomePage> {
                 itemBuilder: (_, int position) {
                   final habit = snapshot.data[position] as Habit;
                   //get your item data here ...
-                  return Card(
-                      child: Row(
-                    children: [
-                      Expanded(
-                        child: ListTile(
-                          title: Text(habit.toString()),
-                        ),
-                      ),
-                      IconButton(
-                          icon: Icon(Icons.add),
-                          onPressed: () {
-                            incrementHabit(habit);
-                          })
-                    ],
-                  ));
+                  //TODO convert into it's own widget
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                        left: 6.0, top: 6.0, right: 6.0, bottom: 0.0),
+                    child: Card(
+                        color: isToday(habit.lastRecordedDate)
+                            ? backgroundColor
+                            : Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.only(
+                              left: 16.0, top: 8.0, right: 8.0, bottom: 8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onLongPress: () {
+                                    // edit habit
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return editHabitDialog(habit);
+                                        }).then((value) {
+                                      if (value != null) {
+                                        updateHabit(value);
+                                      }
+                                    });
+                                  },
+                                  //Container allows whole row to be clicked...
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(habit.name,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                            )),
+                                        Text(
+                                          "${habit.streak} days in a row",
+                                          style: TextStyle(fontSize: 16),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                  color: isToday(habit.lastRecordedDate)
+                                      ? Colors.green
+                                      : Colors.black26,
+                                  icon: Icon(Icons.check),
+                                  onPressed: () {
+                                    if(!isToday(habit.lastRecordedDate)) {
+                                      incrementHabit(habit);
+                                    }
+                                  })
+                            ],
+                          ),
+                        )),
+                  );
                 },
               )
             : Center(
@@ -144,6 +205,44 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  Widget editHabitDialog(Habit habit) {
+    TextEditingController _nameController = TextEditingController();
+    _nameController.text = habit.name;
+    TextEditingController _streakController = TextEditingController();
+    _streakController.text = habit.streak.toString();
+
+    return AlertDialog(
+      title: Text("Edit Habit"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextFormField(
+            decoration: InputDecoration(labelText: "Habit Name"),
+            controller: _nameController,
+          ),
+          TextField(
+            controller: _streakController,
+            decoration: InputDecoration(labelText: "Current streak"),
+            keyboardType: TextInputType.number,
+            inputFormatters: <TextInputFormatter>[
+              FilteringTextInputFormatter.digitsOnly
+            ], // Only numbers can be entered
+          ),
+        ],
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text("OK"),
+          onPressed: () {
+            habit.name = _nameController.text;
+            habit.streak = int.parse(_streakController.text);
+            Navigator.pop(context, habit);
+          },
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -154,6 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       key: _scaffoldKey,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.

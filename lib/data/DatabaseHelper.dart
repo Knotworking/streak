@@ -116,6 +116,15 @@ class DatabaseHelper {
         where: "id = ?", whereArgs: [habit.id]);
   }
 
+  void updateHabit(Habit habit) async {
+    final Database db = await database;
+    habit.lastRecordedDate = DateTime.now();
+
+    // can return the number of rows updated
+    db.update(habitsTable, habit.toMap(),
+        where: "id = ?", whereArgs: [habit.id]);
+  }
+
   // delete all habits from the database
   Future<int> deleteAllHabits() async {
     final Database db = await database;
