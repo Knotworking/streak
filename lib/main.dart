@@ -51,10 +51,17 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DatabaseHelper _dbHelper = DatabaseHelper();
   final backgroundColor = Color.fromRGBO(245, 245, 245, 1);
+
+  @override
+  void initState() {
+    print("init state");
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
 
   bool isToday(DateTime date) {
     final now = DateTime.now();
@@ -169,9 +176,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                       : Colors.black26,
                                   icon: Icon(Icons.check),
                                   onPressed: () {
-                                    if(!isToday(habit.lastRecordedDate)) {
-                                      incrementHabit(habit);
-                                    }
+                                    // if(!isToday(habit.lastRecordedDate)) {
+                                    incrementHabit(habit);
+                                    // }
                                   })
                             ],
                           ),
@@ -278,5 +285,20 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print("app lifecycle state: " + state.toString());
+
+    if (state == AppLifecycleState.resumed) {
+      _dbHelper.checkStreaks().then((value) => setState(() {}));
+    }
   }
 }

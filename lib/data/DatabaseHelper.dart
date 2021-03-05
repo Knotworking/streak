@@ -14,13 +14,13 @@ class DatabaseHelper {
 
   factory DatabaseHelper() {
     if (_instance == null) {
-      _instance = DatabaseHelper._createInstance(); // This is executed only once, singleton object
+      _instance = DatabaseHelper
+          ._createInstance(); // This is executed only once, singleton object
     }
     return _instance;
   }
 
   Future<Database> get database async {
-
     if (_database == null) {
       _database = await initDatabase();
     }
@@ -46,6 +46,26 @@ class DatabaseHelper {
       version: 1,
     );
     return database;
+  }
+
+  Future<void> checkStreaks() async {
+    final Database db = await database;
+
+    // Query the table for all habits.
+    final List<Map<String, dynamic>> maps = await db.query(habitsTable);
+
+    final now = DateTime.now();
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+
+    for (Map<String, dynamic> map in maps) {
+      DateTime lastDate =
+          DateTime.fromMillisecondsSinceEpoch(map['lastRecordedDate']);
+
+      if (lastDate.isBefore(yesterday)) {
+        int id = map['id'];
+        _resetHabitCount(id);
+      }
+    }
   }
 
   // List all habits from the habits table
@@ -108,12 +128,32 @@ class DatabaseHelper {
 
     // Editing the passed in habit causes UI jumps
     Habit existingHabit = await getHabit(habit.id);
+
+    final now = DateTime.now();
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+
+    // reset streak counter if necessary
+    if (existingHabit.lastRecordedDate.isBefore(yesterday)) {
+      existingHabit.streak = 0;
+    }
+
     existingHabit.streak += modifier;
-    existingHabit.lastRecordedDate = DateTime.now();
+    existingHabit.lastRecordedDate = now;
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),
         where: "id = ?", whereArgs: [habit.id]);
+  }
+
+  void _resetHabitCount(int habitId) async {
+    final Database db = await database;
+
+    Habit existingHabit = await getHabit(habitId);
+    existingHabit.streak = 0;
+
+    // can return the number of rows updated
+    db.update(habitsTable, existingHabit.toMap(),
+        where: "id = ?", whereArgs: [habitId]);
   }
 
   void updateHabit(Habit habit) async {
