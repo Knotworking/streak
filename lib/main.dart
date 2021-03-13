@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:streak/ui/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
+import 'package:streak/ui/pages/EditHabitPage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -140,15 +141,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 child: GestureDetector(
                                   onLongPress: () {
                                     // edit habit
-                                    showDialog(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return editHabitDialog(habit);
-                                        }).then((value) {
-                                      if (value != null) {
-                                        updateHabit(value);
-                                      }
-                                    });
+                                    openEditHabitPage(context, habit);
                                   },
                                   //Container allows whole row to be clicked...
                                   child: Container(
@@ -176,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                       : Colors.black26,
                                   icon: Icon(Icons.check),
                                   onPressed: () {
+                                    //TODO commented for testing
                                     // if(!isToday(habit.lastRecordedDate)) {
                                     incrementHabit(habit);
                                     // }
@@ -193,6 +187,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
+  void openEditHabitPage(BuildContext context, Habit habit) {
+    Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => EditHabitPage(habit: habit)))
+        .then((value) => {
+              if (value != null) {updateHabit(value)}
+            });
+  }
+
   Widget newHabitDialog() {
     TextEditingController _controller = TextEditingController();
 
@@ -206,44 +210,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           child: Text("OK"),
           onPressed: () {
             Navigator.pop(context, _controller.text);
-          },
-        )
-      ],
-    );
-  }
-
-  Widget editHabitDialog(Habit habit) {
-    TextEditingController _nameController = TextEditingController();
-    _nameController.text = habit.name;
-    TextEditingController _streakController = TextEditingController();
-    _streakController.text = habit.streak.toString();
-
-    return AlertDialog(
-      title: Text("Edit Habit"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextFormField(
-            decoration: InputDecoration(labelText: "Habit Name"),
-            controller: _nameController,
-          ),
-          TextField(
-            controller: _streakController,
-            decoration: InputDecoration(labelText: "Current streak"),
-            keyboardType: TextInputType.number,
-            inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
-            ], // Only numbers can be entered
-          ),
-        ],
-      ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text("OK"),
-          onPressed: () {
-            habit.name = _nameController.text;
-            habit.streak = int.parse(_streakController.text);
-            Navigator.pop(context, habit);
           },
         )
       ],
