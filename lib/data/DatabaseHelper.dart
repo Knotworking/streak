@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:streak/HabitUtils.dart';
 import 'package:streak/models/Habit.dart';
+import 'package:streak/models/TargetPeriod.dart';
 
 final habitsTable = "habits";
 
@@ -34,10 +37,13 @@ class DatabaseHelper {
       onCreate: (db, version) {
         db.execute(
           '''CREATE TABLE $habitsTable(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            streak INTEGER,
-            lastRecordedDate INTEGER)
+            ${Habit.idKey} INTEGER PRIMARY KEY AUTOINCREMENT,
+            ${Habit.nameKey} TEXT,
+            ${Habit.targetKey} INTEGER,
+            ${Habit.targetPeriodKey} TEXT,
+            ${Habit.periodCountKey} INTEGER,
+            ${Habit.streakKey} INTEGER,
+            ${Habit.periodEndKey} INTEGER)
           ''',
         );
       },
@@ -51,18 +57,28 @@ class DatabaseHelper {
   Future<void> checkStreaks() async {
     final Database db = await database;
 
+    print("checking streaks");
+
     // Query the table for all habits.
     final List<Map<String, dynamic>> maps = await db.query(habitsTable);
 
     final now = DateTime.now();
-    final yesterday = DateTime(now.year, now.month, now.day - 1);
 
     for (Map<String, dynamic> map in maps) {
-      DateTime lastDate =
-          DateTime.fromMillisecondsSinceEpoch(map['lastRecordedDate']);
+      DateTime periodEnd =
+          DateTime.fromMillisecondsSinceEpoch(map[Habit.periodEndKey]);
 
-      if (lastDate.isBefore(yesterday)) {
-        int id = map['id'];
+      if (now.isAfter(periodEnd)) {
+        int id = map[Habit.idKey];
+        if (map[Habit.periodCountKey] >= map[Habit.targetKey]) {
+          print("goal reached for ${map[Habit.nameKey]}");
+          _incrementHabitStreak(id);
+        } else {
+          print("goal not reached for ${map[Habit.nameKey]}");
+          _resetHabitStreak(id);
+        }
+
+        print("resetting count for ${map[Habit.nameKey]}");
         _resetHabitCount(id);
       }
     }
@@ -79,11 +95,15 @@ class DatabaseHelper {
     // Convert the List<Map<String, dynamic> into a List<Habit>.
     return List.generate(maps.length, (i) {
       return Habit(
-          id: maps[i]['id'],
-          name: maps[i]['name'],
-          streak: maps[i]['streak'],
-          lastRecordedDate:
-              DateTime.fromMillisecondsSinceEpoch(maps[i]['lastRecordedDate']));
+          id: maps[i][Habit.idKey],
+          name: maps[i][Habit.nameKey],
+          target: maps[i][Habit.targetKey],
+          targetPeriod: EnumToString.fromString(
+              TargetPeriod.values, maps[i][Habit.targetPeriodKey]),
+          periodCount: maps[i][Habit.periodCountKey],
+          streak: maps[i][Habit.streakKey],
+          periodEnd:
+              DateTime.fromMillisecondsSinceEpoch(maps[i][Habit.periodEndKey]));
     });
   }
 
@@ -91,16 +111,20 @@ class DatabaseHelper {
   Future<Habit> getHabit(int id) async {
     final Database db = await database;
 
-    final List<Map<String, dynamic>> map =
-        await db.query(habitsTable, where: "id = ?", whereArgs: [id], limit: 1);
+    final List<Map<String, dynamic>> map = await db.query(habitsTable,
+        where: "${Habit.idKey} = ?", whereArgs: [id], limit: 1);
 
     if (map.isNotEmpty) {
       return Habit(
-          id: map[0]['id'],
-          name: map[0]['name'],
-          streak: map[0]['streak'],
-          lastRecordedDate:
-              DateTime.fromMillisecondsSinceEpoch(map[0]['lastRecordedDate']));
+          id: map[0][Habit.idKey],
+          name: map[0][Habit.nameKey],
+          target: map[0][Habit.targetKey],
+          targetPeriod: EnumToString.fromString(
+              TargetPeriod.values, map[0][Habit.targetPeriodKey]),
+          periodCount: map[0][Habit.periodCountKey],
+          streak: map[0][Habit.streakKey],
+          periodEnd:
+              DateTime.fromMillisecondsSinceEpoch(map[0][Habit.periodEndKey]));
     } else {
       return null;
     }
@@ -123,29 +147,36 @@ class DatabaseHelper {
   }
 
   // change a habit's count by an integer value
-  void modifyHabitCount(Habit habit, int modifier) async {
+  Future<void> modifyHabitCount(Habit habit, int modifier) async {
     final Database db = await database;
+
+    await checkStreaks();
 
     // Editing the passed in habit causes UI jumps
     Habit existingHabit = await getHabit(habit.id);
 
-    final now = DateTime.now();
-    final yesterday = DateTime(now.year, now.month, now.day - 1);
-
-    // reset streak counter if necessary
-    if (existingHabit.lastRecordedDate.isBefore(yesterday)) {
-      existingHabit.streak = 0;
-    }
-
-    existingHabit.streak += modifier;
-    existingHabit.lastRecordedDate = now;
+    existingHabit.periodCount += 1;
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),
-        where: "id = ?", whereArgs: [habit.id]);
+        where: "${Habit.idKey} = ?", whereArgs: [habit.id]);
+    // print("habit updated: ${existingHabit.name}");
   }
 
   void _resetHabitCount(int habitId) async {
+    final Database db = await database;
+
+    Habit existingHabit = await getHabit(habitId);
+    existingHabit.periodCount = 0;
+    existingHabit.periodEnd = HabitUtils.calculatePeriodEnd(
+        existingHabit.periodEnd, existingHabit.targetPeriod);
+
+    // can return the number of rows updated
+    db.update(habitsTable, existingHabit.toMap(),
+        where: "${Habit.idKey} = ?", whereArgs: [habitId]);
+  }
+
+  void _resetHabitStreak(int habitId) async {
     final Database db = await database;
 
     Habit existingHabit = await getHabit(habitId);
@@ -153,16 +184,27 @@ class DatabaseHelper {
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),
-        where: "id = ?", whereArgs: [habitId]);
+        where: "${Habit.idKey} = ?", whereArgs: [habitId]);
+  }
+
+  void _incrementHabitStreak(int habitId) async {
+    final Database db = await database;
+
+    Habit existingHabit = await getHabit(habitId);
+    existingHabit.streak += 1;
+
+    // can return the number of rows updated
+    db.update(habitsTable, existingHabit.toMap(),
+        where: "${Habit.idKey} = ?", whereArgs: [habitId]);
   }
 
   void updateHabit(Habit habit) async {
     final Database db = await database;
-    habit.lastRecordedDate = DateTime.now();
+    habit.periodEnd = DateTime.now();
 
     // can return the number of rows updated
     db.update(habitsTable, habit.toMap(),
-        where: "id = ?", whereArgs: [habit.id]);
+        where: "${Habit.idKey} = ?", whereArgs: [habit.id]);
   }
 
   // delete all habits from the database

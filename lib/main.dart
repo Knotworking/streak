@@ -1,8 +1,9 @@
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:streak/ui/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
+import 'package:streak/ui/pages/AddHabitPage.dart';
 import 'package:streak/ui/pages/EditHabitPage.dart';
 
 void main() async {
@@ -70,9 +71,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return diff == 0 && now.day == date.day;
   }
 
-  void addHabit(String name) async {
-    Habit newHabit = Habit(
-        id: -1, name: name, streak: 0, lastRecordedDate: DateTime.utc(1970));
+  void addHabit(Habit newHabit) async {
     _dbHelper.saveHabit(newHabit);
     print(await _dbHelper.getHabits());
     setState(() {
@@ -87,11 +86,12 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void incrementHabit(Habit habit) async {
-    _dbHelper.modifyHabitCount(habit, 1);
-    setState(() {
-      // do something?
+    _dbHelper.modifyHabitCount(habit, 1).whenComplete(() {
+      setState(() {
+        // do something?
+      });
+      _showOverlay(context);
     });
-    _showOverlay(context);
   }
 
   void updateHabit(Habit habit) async {
@@ -129,7 +129,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     padding: const EdgeInsets.only(
                         left: 6.0, top: 6.0, right: 6.0, bottom: 0.0),
                     child: Card(
-                        color: isToday(habit.lastRecordedDate)
+                        color: isToday(habit.periodEnd)
                             ? backgroundColor
                             : Colors.white,
                         child: Padding(
@@ -155,16 +155,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                               fontSize: 20,
                                             )),
                                         Text(
-                                          "${habit.streak} days in a row",
+                                          "${habit.streak} ${EnumToString.convertToString(habit.targetPeriod)}s in a row",
                                           style: TextStyle(fontSize: 16),
+                                        ),
+                                        LinearProgressIndicator(
+                                          value: habit.periodCount.toDouble() / habit.target,
                                         )
                                       ],
                                     ),
                                   ),
                                 ),
                               ),
+                              //TODO change icon to plus, unless target met
                               IconButton(
-                                  color: isToday(habit.lastRecordedDate)
+                                  color: isToday(habit.periodEnd)
                                       ? Colors.green
                                       : Colors.black26,
                                   icon: Icon(Icons.check),
@@ -187,6 +191,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
+  void openAddHabitPage(BuildContext context) {
+    Navigator.push(
+            context, MaterialPageRoute(builder: (context) => AddHabitPage()))
+        .then((value) => {
+              if (value != null) {addHabit(value)}
+            });
+  }
+
   void openEditHabitPage(BuildContext context, Habit habit) {
     Navigator.push(
             context,
@@ -195,25 +207,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         .then((value) => {
               if (value != null) {updateHabit(value)}
             });
-  }
-
-  Widget newHabitDialog() {
-    TextEditingController _controller = TextEditingController();
-
-    return AlertDialog(
-      title: Text("New Habit"),
-      content: TextFormField(
-        controller: _controller,
-      ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text("OK"),
-          onPressed: () {
-            Navigator.pop(context, _controller.text);
-          },
-        )
-      ],
-    );
   }
 
   @override
@@ -239,13 +232,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       body: listWidget(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return newHabitDialog();
-              }).then((value) {
-            addHabit(value);
-          });
+          openAddHabitPage(context);
         },
         tooltip: 'Add Habit',
         child: Icon(Icons.add),

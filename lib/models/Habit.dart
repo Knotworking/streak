@@ -1,10 +1,31 @@
+import 'package:streak/models/TargetPeriod.dart';
+
 class Habit {
+  static const idKey = 'id';
+  static const nameKey = 'name';
+  static const targetKey = 'target';
+  static const targetPeriodKey = 'targetPeriod';
+  static const periodCountKey = 'periodCount';
+  static const streakKey = 'streak';
+  static const periodEndKey = 'periodEnd';
+
   final int id;
   String name;
+  int target;
+  TargetPeriod targetPeriod;
+  int periodCount;
   int streak;
-  DateTime lastRecordedDate;
+  DateTime periodEnd;
 
-  Habit({this.id, this.name, this.streak, this.lastRecordedDate});
+  Habit(
+      {this.id,
+      this.name,
+      this.target,
+      this.targetPeriod,
+      this.periodCount,
+      this.streak,
+      this.periodEnd
+      });
 
   //TODO "new" habit constructor
 
@@ -13,16 +34,22 @@ class Habit {
   Map<String, dynamic> toMap() {
     if (id >= 0) {
       return {
-        'id': id,
-        'name': name,
-        'streak': streak,
-        'lastRecordedDate': lastRecordedDate.millisecondsSinceEpoch
+        idKey: id,
+        nameKey: name,
+        targetKey: target,
+        targetPeriodKey: targetPeriod.toString().split('.').last,
+        periodCountKey : periodCount,
+        streakKey: streak,
+        periodEndKey: periodEnd.millisecondsSinceEpoch
       };
     } else {
       return {
-        'name': name,
-        'streak': streak,
-        'lastRecordedDate': lastRecordedDate.millisecondsSinceEpoch
+        nameKey: name,
+        targetKey: target,
+        targetPeriodKey: targetPeriod.toString().split('.').last,
+        periodCountKey : periodCount,
+        streakKey: streak,
+        periodEndKey: periodEnd.millisecondsSinceEpoch
       };
     }
   }
@@ -31,6 +58,12 @@ class Habit {
   // each habit when using the print statement.
   @override
   String toString() {
-    return 'Habit{id: $id, name: $name, streak: $streak, lastRecordedDate: $lastRecordedDate}';
+    return 'Habit{$idKey: $id, '
+        '$nameKey: $name, '
+        '$targetKey: $target, '
+        '$targetPeriodKey: $targetPeriod, '
+        '$periodCountKey: $periodCount, '
+        '$streakKey: $streak, '
+        '$periodEndKey: $periodEnd}';
   }
 }
