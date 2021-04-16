@@ -69,6 +69,7 @@ class DatabaseHelper {
           DateTime.fromMillisecondsSinceEpoch(map[Habit.periodEndKey]);
 
       if (now.isAfter(periodEnd)) {
+        print('now: $now is after period end: $periodEnd');
         int id = map[Habit.idKey];
         if (map[Habit.periodCountKey] >= map[Habit.targetKey]) {
           print("goal reached for ${map[Habit.nameKey]}");

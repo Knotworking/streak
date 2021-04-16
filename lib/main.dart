@@ -92,6 +92,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
       });
       _showOverlay(context);
     });
+    print(await _dbHelper.getHabits());
   }
 
   void updateHabit(Habit habit) async {
