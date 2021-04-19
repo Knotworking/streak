@@ -73,7 +73,6 @@ class DatabaseHelper {
         int id = map[Habit.idKey];
         if (map[Habit.periodCountKey] >= map[Habit.targetKey]) {
           print("goal reached for ${map[Habit.nameKey]}");
-          _incrementHabitStreak(id);
         } else {
           print("goal not reached for ${map[Habit.nameKey]}");
           _resetHabitStreak(id);
@@ -156,7 +155,14 @@ class DatabaseHelper {
     // Editing the passed in habit causes UI jumps
     Habit existingHabit = await getHabit(habit.id);
 
-    existingHabit.periodCount += 1;
+    int previousCount = existingHabit.periodCount;
+
+    existingHabit.periodCount += modifier;
+
+    // If the new count crosses the target threshold, increment the streak.
+    if (previousCount < existingHabit.target && existingHabit.periodCount >= existingHabit.target) {
+      existingHabit.streak += 1;
+    }
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),
@@ -182,17 +188,6 @@ class DatabaseHelper {
 
     Habit existingHabit = await getHabit(habitId);
     existingHabit.streak = 0;
-
-    // can return the number of rows updated
-    db.update(habitsTable, existingHabit.toMap(),
-        where: "${Habit.idKey} = ?", whereArgs: [habitId]);
-  }
-
-  void _incrementHabitStreak(int habitId) async {
-    final Database db = await database;
-
-    Habit existingHabit = await getHabit(habitId);
-    existingHabit.streak += 1;
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),

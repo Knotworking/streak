@@ -65,10 +65,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     super.initState();
   }
 
-  bool isToday(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date).inDays;
-    return diff == 0 && now.day == date.day;
+  bool _isTargetMet(Habit habit) {
+    return habit.periodCount >= habit.target;
   }
 
   void addHabit(Habit newHabit) async {
@@ -130,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     padding: const EdgeInsets.only(
                         left: 6.0, top: 6.0, right: 6.0, bottom: 0.0),
                     child: Card(
-                        color: isToday(habit.periodEnd)
+                        color: _isTargetMet(habit)
                             ? backgroundColor
                             : Colors.white,
                         child: Padding(
@@ -153,14 +151,21 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                       children: [
                                         Text(habit.name,
                                             style: TextStyle(
-                                              fontSize: 20,
-                                            )),
+                                                fontSize: 20,
+                                                decoration: _isTargetMet(habit)
+                                                    ? TextDecoration.lineThrough
+                                                    : null)),
+                                        Text(
+                                          "Done ${habit.periodCount} times this ${EnumToString.convertToString(habit.targetPeriod)}",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
                                         Text(
                                           "${habit.streak} ${EnumToString.convertToString(habit.targetPeriod)}s in a row",
                                           style: TextStyle(fontSize: 16),
                                         ),
                                         LinearProgressIndicator(
-                                          value: habit.periodCount.toDouble() / habit.target,
+                                          value: habit.periodCount.toDouble() /
+                                              habit.target,
                                         )
                                       ],
                                     ),
@@ -169,15 +174,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                               ),
                               //TODO change icon to plus, unless target met
                               IconButton(
-                                  color: isToday(habit.periodEnd)
-                                      ? Colors.green
-                                      : Colors.black26,
-                                  icon: Icon(Icons.check),
+                                  color: Colors.black54,
+                                  icon: Icon(Icons.add),
                                   onPressed: () {
-                                    //TODO commented for testing
-                                    // if(!isToday(habit.lastRecordedDate)) {
                                     incrementHabit(habit);
-                                    // }
                                   })
                             ],
                           ),
