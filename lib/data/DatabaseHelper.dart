@@ -75,11 +75,11 @@ class DatabaseHelper {
           print("goal reached for ${map[Habit.nameKey]}");
         } else {
           print("goal not reached for ${map[Habit.nameKey]}");
-          _resetHabitStreak(id);
+          await _resetHabitStreak(id);
         }
 
         print("resetting count for ${map[Habit.nameKey]}");
-        _resetHabitCount(id);
+        await _resetHabitCount(id);
       }
     }
   }
@@ -160,7 +160,8 @@ class DatabaseHelper {
     existingHabit.periodCount += modifier;
 
     // If the new count crosses the target threshold, increment the streak.
-    if (previousCount < existingHabit.target && existingHabit.periodCount >= existingHabit.target) {
+    if (previousCount < existingHabit.target &&
+        existingHabit.periodCount >= existingHabit.target) {
       existingHabit.streak += 1;
     }
 
@@ -170,7 +171,7 @@ class DatabaseHelper {
     // print("habit updated: ${existingHabit.name}");
   }
 
-  void _resetHabitCount(int habitId) async {
+  Future<void> _resetHabitCount(int habitId) async {
     final Database db = await database;
 
     Habit existingHabit = await getHabit(habitId);
@@ -183,7 +184,7 @@ class DatabaseHelper {
         where: "${Habit.idKey} = ?", whereArgs: [habitId]);
   }
 
-  void _resetHabitStreak(int habitId) async {
+  Future<void> _resetHabitStreak(int habitId) async {
     final Database db = await database;
 
     Habit existingHabit = await getHabit(habitId);
@@ -194,7 +195,7 @@ class DatabaseHelper {
         where: "${Habit.idKey} = ?", whereArgs: [habitId]);
   }
 
-  void updateHabit(Habit habit) async {
+  Future<void> updateHabit(Habit habit) async {
     final Database db = await database;
     habit.periodEnd = DateTime.now();
 

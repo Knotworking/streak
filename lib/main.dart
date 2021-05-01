@@ -94,10 +94,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void updateHabit(Habit habit) async {
-    _dbHelper.updateHabit(habit);
-    setState(() {
-      // do something?
-    });
+    _dbHelper.updateHabit(habit).then((value) => setState(() {
+          // do something?
+        }));
   }
 
   void _showOverlay(BuildContext context) {
