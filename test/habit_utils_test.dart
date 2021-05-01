@@ -10,7 +10,20 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 1, 2, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
+
+    // verify
+    expect(actual, expectedEndDate);
+  });
+
+  test('Calculate period end for multiple days', () {
+    // prepare
+    DateTime periodStart = DateTime(2020, 1, 1, 12);
+    TargetPeriod targetPeriod = TargetPeriod.day;
+    DateTime expectedEndDate = DateTime(2020, 1, 4, 0);
+
+    // execute
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 3);
 
     // verify
     expect(actual, expectedEndDate);
@@ -23,7 +36,7 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 2, 1, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
 
     // verify
     expect(actual, expectedEndDate);
@@ -36,7 +49,7 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 1, 2, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
 
     // verify
     expect(actual, expectedEndDate);
@@ -49,7 +62,20 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 1, 6, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
+
+    // verify
+    expect(actual, expectedEndDate);
+  });
+
+  test('Calculate period end for multiple weeks', () {
+    // prepare
+    DateTime periodStart = DateTime(2020, 1, 1, 12);
+    TargetPeriod targetPeriod = TargetPeriod.week;
+    DateTime expectedEndDate = DateTime(2020, 1, 20, 0);
+
+    // execute
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 3);
 
     // verify
     expect(actual, expectedEndDate);
@@ -62,7 +88,7 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 1, 6, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
 
     // verify
     expect(actual, expectedEndDate);
@@ -75,7 +101,7 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 2, 3, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
 
     // verify
     expect(actual, expectedEndDate);
@@ -88,7 +114,20 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 2, 1, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
+
+    // verify
+    expect(actual, expectedEndDate);
+  });
+
+  test('Calculate period end for multiple months', () {
+    // prepare
+    DateTime periodStart = DateTime(2020, 1, 15, 12);
+    TargetPeriod targetPeriod = TargetPeriod.month;
+    DateTime expectedEndDate = DateTime(2021, 1, 1, 0);
+
+    // execute
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 12);
 
     // verify
     expect(actual, expectedEndDate);
@@ -101,7 +140,7 @@ void main() {
     DateTime expectedEndDate = DateTime(2020, 2, 1, 0);
 
     // execute
-    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod);
+    DateTime actual = HabitUtils.calculatePeriodEnd(periodStart, targetPeriod, 1);
 
     // verify
     expect(actual, expectedEndDate);

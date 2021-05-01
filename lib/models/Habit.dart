@@ -6,6 +6,7 @@ class Habit {
   static const targetKey = 'target';
   static const targetPeriodKey = 'targetPeriod';
   static const periodCountKey = 'periodCount';
+  static const countForPeriodKey = 'countForPeriod';
   static const streakKey = 'streak';
   static const periodEndKey = 'periodEnd';
 
@@ -14,6 +15,7 @@ class Habit {
   int target;
   TargetPeriod targetPeriod;
   int periodCount;
+  int countForPeriod;
   int streak;
   DateTime periodEnd;
 
@@ -23,9 +25,9 @@ class Habit {
       this.target,
       this.targetPeriod,
       this.periodCount,
+      this.countForPeriod,
       this.streak,
-      this.periodEnd
-      });
+      this.periodEnd});
 
   //TODO "new" habit constructor
 
@@ -38,7 +40,8 @@ class Habit {
         nameKey: name,
         targetKey: target,
         targetPeriodKey: targetPeriod.toString().split('.').last,
-        periodCountKey : periodCount,
+        periodCountKey: periodCount,
+        countForPeriodKey: countForPeriod,
         streakKey: streak,
         periodEndKey: periodEnd.millisecondsSinceEpoch
       };
@@ -47,7 +50,8 @@ class Habit {
         nameKey: name,
         targetKey: target,
         targetPeriodKey: targetPeriod.toString().split('.').last,
-        periodCountKey : periodCount,
+        periodCountKey: periodCount,
+        countForPeriodKey: countForPeriod,
         streakKey: streak,
         periodEndKey: periodEnd.millisecondsSinceEpoch
       };
@@ -63,6 +67,7 @@ class Habit {
         '$targetKey: $target, '
         '$targetPeriodKey: $targetPeriod, '
         '$periodCountKey: $periodCount, '
+        '$countForPeriodKey: $countForPeriod, '
         '$streakKey: $streak, '
         '$periodEndKey: $periodEnd}';
   }

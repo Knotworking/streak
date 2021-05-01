@@ -1,5 +1,6 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:streak/ui/StreakOverlay.dart';
 import 'package:streak/data/DatabaseHelper.dart';
 import 'package:streak/models/Habit.dart';
@@ -66,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   bool _isTargetMet(Habit habit) {
-    return habit.periodCount >= habit.target;
+    return habit.countForPeriod >= habit.target;
   }
 
   void addHabit(Habit newHabit) async {
@@ -123,6 +124,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   final habit = snapshot.data[position] as Habit;
                   //get your item data here ...
                   //TODO convert into it's own widget
+                  final timeUntilEnd = Jiffy(habit.periodEnd).fromNow();
+
                   return Padding(
                     padding: const EdgeInsets.only(
                         left: 6.0, top: 6.0, right: 6.0, bottom: 0.0),
@@ -155,15 +158,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                                     ? TextDecoration.lineThrough
                                                     : null)),
                                         Text(
-                                          "Done ${habit.periodCount} times this ${EnumToString.convertToString(habit.targetPeriod)}",
+                                          "Done ${habit.countForPeriod}/${habit.target} times so far. Ends $timeUntilEnd.",
                                           style: TextStyle(fontSize: 16),
                                         ),
                                         Text(
-                                          "${habit.streak} ${EnumToString.convertToString(habit.targetPeriod)}s in a row",
+                                          "${habit.streak * habit.periodCount} ${EnumToString.convertToString(habit.targetPeriod)}s in a row",
                                           style: TextStyle(fontSize: 16),
                                         ),
                                         LinearProgressIndicator(
-                                          value: habit.periodCount.toDouble() /
+                                          value: habit.countForPeriod.toDouble() /
                                               habit.target,
                                         )
                                       ],

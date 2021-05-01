@@ -42,6 +42,7 @@ class DatabaseHelper {
             ${Habit.targetKey} INTEGER,
             ${Habit.targetPeriodKey} TEXT,
             ${Habit.periodCountKey} INTEGER,
+            ${Habit.countForPeriodKey} INTEGER,
             ${Habit.streakKey} INTEGER,
             ${Habit.periodEndKey} INTEGER)
           ''',
@@ -71,7 +72,7 @@ class DatabaseHelper {
       if (now.isAfter(periodEnd)) {
         print('now: $now is after period end: $periodEnd');
         int id = map[Habit.idKey];
-        if (map[Habit.periodCountKey] >= map[Habit.targetKey]) {
+        if (map[Habit.countForPeriodKey] >= map[Habit.targetKey]) {
           print("goal reached for ${map[Habit.nameKey]}");
         } else {
           print("goal not reached for ${map[Habit.nameKey]}");
@@ -101,6 +102,7 @@ class DatabaseHelper {
           targetPeriod: EnumToString.fromString(
               TargetPeriod.values, maps[i][Habit.targetPeriodKey]),
           periodCount: maps[i][Habit.periodCountKey],
+          countForPeriod: maps[i][Habit.countForPeriodKey],
           streak: maps[i][Habit.streakKey],
           periodEnd:
               DateTime.fromMillisecondsSinceEpoch(maps[i][Habit.periodEndKey]));
@@ -122,6 +124,7 @@ class DatabaseHelper {
           targetPeriod: EnumToString.fromString(
               TargetPeriod.values, map[0][Habit.targetPeriodKey]),
           periodCount: map[0][Habit.periodCountKey],
+          countForPeriod: map[0][Habit.countForPeriodKey],
           streak: map[0][Habit.streakKey],
           periodEnd:
               DateTime.fromMillisecondsSinceEpoch(map[0][Habit.periodEndKey]));
@@ -155,13 +158,13 @@ class DatabaseHelper {
     // Editing the passed in habit causes UI jumps
     Habit existingHabit = await getHabit(habit.id);
 
-    int previousCount = existingHabit.periodCount;
+    int previousCount = existingHabit.countForPeriod;
 
-    existingHabit.periodCount += modifier;
+    existingHabit.countForPeriod += modifier;
 
     // If the new count crosses the target threshold, increment the streak.
     if (previousCount < existingHabit.target &&
-        existingHabit.periodCount >= existingHabit.target) {
+        existingHabit.countForPeriod >= existingHabit.target) {
       existingHabit.streak += 1;
     }
 
@@ -175,9 +178,9 @@ class DatabaseHelper {
     final Database db = await database;
 
     Habit existingHabit = await getHabit(habitId);
-    existingHabit.periodCount = 0;
+    existingHabit.countForPeriod = 0;
     existingHabit.periodEnd = HabitUtils.calculatePeriodEnd(
-        existingHabit.periodEnd, existingHabit.targetPeriod);
+        existingHabit.periodEnd, existingHabit.targetPeriod, existingHabit.periodCount);
 
     // can return the number of rows updated
     db.update(habitsTable, existingHabit.toMap(),

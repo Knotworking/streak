@@ -33,6 +33,8 @@ dependencies:
 
   enum_to_string: ^2.0.1
 
+  jiffy: ^4.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
