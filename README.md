@@ -2,15 +2,8 @@
 
 Flutter sandbox app to record daily habit streaks.
 
-## Getting Started
+## Stopping development
 
-This project is a starting point for a Flutter application.
+I originally started writing this app for my girlfriend, so that I could add custom feature that existing habit apps don't have. However she has an iPhone, and I only discovered after starting development that without a paid Apple developer account the app can't remain valid on her device forever (unlike Android).
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+I'll keep this project here for my own reference. Maybe I'll pick it up again some day.
